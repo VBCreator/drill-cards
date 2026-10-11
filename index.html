@@ -1,0 +1,557 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><title>Drill Cards</title></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Literata:opsz,wght@7..72,400;7..72,600&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: a single phone-width column; the index card is the hero of every screen */
+:root{
+  --bg:#E9EDF3; --surface:#F7F9FC; --card:#FFFFFF; --ink:#1A2233; --muted:#5D6A82; --line:#CFD8E6;
+  --accent:#2D47C7; --accent-ink:#FFFFFF; --accent-soft:#DFE5FB;
+  --rule:#C8D7EE; --margin:#D8635A;
+  --good:#23845A; --good-soft:#DCF1E6; --warn:#B57A0C; --warn-soft:#F7EBD0; --bad:#BF3B30; --bad-soft:#F8DEDB;
+  --shadow:0 1px 2px rgba(26,34,51,.06),0 8px 24px rgba(26,34,51,.08);
+  --f-ui:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-card:"Literata",Georgia,"Times New Roman",serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11151D; --surface:#171C26; --card:#1D2331; --ink:#E5E9F1; --muted:#97A2B8; --line:#2B3446;
+  --accent:#8299FF; --accent-ink:#0F1426; --accent-soft:#232C4A;
+  --rule:#26324A; --margin:#B4544C;
+  --good:#5CC48F; --good-soft:#18342A; --warn:#E0AE4A; --warn-soft:#3A2F17; --bad:#F07D72; --bad-soft:#3D1F1D;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11151D; --surface:#171C26; --card:#1D2331; --ink:#E5E9F1; --muted:#97A2B8; --line:#2B3446;
+  --accent:#8299FF; --accent-ink:#0F1426; --accent-soft:#232C4A;
+  --rule:#26324A; --margin:#B4544C;
+  --good:#5CC48F; --good-soft:#18342A; --warn:#E0AE4A; --warn-soft:#3A2F17; --bad:#F07D72; --bad-soft:#3D1F1D;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5}
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{margin:0;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,label:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:8px}
+.brand b{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.brand span{color:var(--muted);font-size:13px}
+.select{appearance:none;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 32px 7px 14px;font:inherit;font-weight:500;color:var(--ink);
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 17px) 55%,calc(100% - 12px) 55%;background-size:5px 5px;background-repeat:no-repeat}
+
+.step{display:flex;flex-direction:column;gap:10px}
+.step-h{display:flex;align-items:baseline;gap:10px}
+.step-h .n{font-family:var(--f-mono);font-size:12px;color:var(--accent);font-weight:600}
+.step-h h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--muted)}
+.crumb{font-size:13px;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:600}
+
+/* lesson tree */
+.lesson{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.lesson-h{display:flex;gap:12px;align-items:baseline;padding:12px 14px 8px}
+.lesson-h .num{font-family:var(--f-mono);font-size:13px;color:var(--margin);font-weight:600}
+.lesson-h h3{font-size:16px;font-weight:600;line-height:1.3}
+.block{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);cursor:pointer}
+.block input{width:18px;height:18px;accent-color:var(--accent);margin:0}
+.block .t{min-width:0}
+.block .t div{font-weight:500}
+.bar{height:4px;border-radius:2px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--good);border-radius:2px;transition:width .3s}
+.block .cnt{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mist{display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px dashed var(--line);border-radius:14px;cursor:pointer}
+.mist input{width:18px;height:18px;accent-color:var(--bad);margin:0}
+.mist .cnt{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--bad)}
+.mist.off{opacity:.55;cursor:default}
+
+/* modes */
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mode{position:relative;display:flex;flex-direction:column;gap:4px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;min-width:0}
+.mode input{position:absolute;opacity:0;pointer-events:none}
+.mode b{font-size:15px}
+.mode small{color:var(--muted);font-size:12.5px;line-height:1.35}
+.mode:has(input:checked){border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+@media (max-width:440px){.modes{grid-template-columns:1fr}.mode{flex-direction:row;align-items:baseline;gap:10px}.mode small{flex:1}}
+
+/* settings */
+.opts{display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.opt>span{font-weight:500}
+.seg{display:inline-flex;background:var(--bg);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:6px 11px;border-radius:8px;font-size:13.5px;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.switch input{width:18px;height:18px;accent-color:var(--accent);margin:0}
+
+.btn{border:0;border-radius:12px;padding:13px 18px;font-weight:600;font-size:15.5px;background:var(--accent);color:var(--accent-ink);transition:transform .08s,filter .15s}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn.good{background:var(--good-soft);color:var(--good)}
+.btn.warn{background:var(--warn-soft);color:var(--warn)}
+.btn.bad{background:var(--bad-soft);color:var(--bad)}
+.btn kbd{font-family:var(--f-mono);font-size:11px;opacity:.6;margin-left:6px;font-weight:500}
+.start{width:100%;font-size:17px;padding:16px}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12.5px}
+.link{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:12.5px}
+.link.danger{color:var(--bad)}
+
+/* session */
+.s-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.s-meta{display:flex;gap:14px;align-items:center;font-size:13px;color:var(--muted)}
+.s-meta .mono{color:var(--ink)}
+.progress{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.tbar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--good);width:100%}
+.tbar.low i{background:var(--bad)}
+
+.scene{perspective:1400px}
+.card{position:relative;width:100%;min-height:250px;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.7,.2,1);cursor:pointer}
+.card.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:10px;background-color:var(--card);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;padding:16px 20px 18px;overflow:hidden;
+  background-image:linear-gradient(to bottom,transparent 46px,var(--margin) 46px,var(--margin) 48px,transparent 48px),
+    repeating-linear-gradient(to bottom,transparent 0,transparent 31px,var(--rule) 31px,var(--rule) 32px);
+  background-position:0 0,0 48px;background-repeat:no-repeat,repeat-y;background-size:100% 100%,100% 100%}
+.face.back{transform:rotateY(180deg)}
+.face-h{display:flex;justify-content:space-between;align-items:center;height:26px;font-size:12px;color:var(--muted);gap:8px}
+.face-h .tag{text-transform:uppercase;letter-spacing:.09em;font-weight:600}
+.face-body{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:10px;padding-top:14px;min-width:0}
+.phrase{font-family:var(--f-card);font-size:clamp(22px,6vw,30px);line-height:1.25;font-weight:600;text-wrap:balance;overflow-wrap:anywhere}
+.sub{font-size:14px;color:var(--muted)}
+.hint{font-family:var(--f-mono);font-size:13px;background:var(--warn-soft);color:var(--warn);padding:3px 10px;border-radius:999px}
+.speak{border:1px solid var(--line);background:var(--surface);border-radius:999px;width:38px;height:38px;display:inline-grid;place-items:center;color:var(--accent)}
+.speak svg{width:18px;height:18px}
+.timeout{color:var(--bad);font-weight:600;font-size:13px}
+
+.ctrl{display:flex;gap:8px}
+.ctrl .btn{flex:1}
+.tip{font-size:12px;color:var(--muted);text-align:center}
+
+/* results */
+.score{display:flex;flex-direction:column;align-items:center;gap:6px;padding:24px 16px;background:var(--surface);border:1px solid var(--line);border-radius:16px;text-align:center}
+.score .big{font-family:var(--f-mono);font-size:52px;font-weight:600;line-height:1;letter-spacing:-.03em}
+.score .big small{font-size:24px;color:var(--muted)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{font-size:13px;padding:4px 10px;border-radius:999px;font-weight:500}
+.list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.list div{padding:10px 14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.list div:first-child{border-top:0}
+.list .en{font-family:var(--f-card);font-weight:600}
+.list .ru{font-size:13.5px;color:var(--muted)}
+.empty{color:var(--muted);text-align:center;padding:8px}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <section id="home" class="wrap" style="padding:0">
+    <header class="top">
+      <div class="brand"><b>Drill</b><span>самопроверка фраз</span></div>
+      <select id="lang" class="select" aria-label="Изучаемый язык">
+        <option value="en">🇬🇧 English</option>
+        <option disabled>Deutsch — скоро</option>
+        <option disabled>Español — скоро</option>
+      </select>
+    </header>
+
+    <div class="step">
+      <div class="step-h"><span class="n">1</span><h2>Что тренировать</h2></div>
+      <div class="crumb">English › <b>Базовый курс · Действия с предметами</b></div>
+      <div id="tree" class="step"></div>
+      <label id="mistRow" class="mist"><input type="checkbox" id="mist"><span>Добавить «Мои ошибки»</span><span class="cnt" id="mistCnt"></span></label>
+    </div>
+
+    <div class="step">
+      <div class="step-h"><span class="n">2</span><h2>Режим</h2></div>
+      <div class="modes" role="radiogroup">
+        <label class="mode"><input type="radio" name="mode" value="study"><b>Изучение</b><small>Листаешь и переворачиваешь сколько угодно</small></label>
+        <label class="mode"><input type="radio" name="mode" value="self"><b>Самопроверка</b><small>Вспомни, скажи вслух, проверь, оцени себя</small></label>
+        <label class="mode"><input type="radio" name="mode" value="exam"><b>Экзамен</b><small>Вперемешку, на время, с итоговым баллом</small></label>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-h"><span class="n">3</span><h2>Настройки</h2></div>
+      <div class="opts">
+        <div class="opt"><span>Направление</span>
+          <div class="seg" data-key="dir"><button data-v="ru">RU → EN</button><button data-v="en">EN → RU</button><button data-v="mix">Смешанно</button></div></div>
+        <div class="opt" id="optOrder"><span>Порядок</span>
+          <div class="seg" data-key="order"><button data-v="seq">По порядку</button><button data-v="rnd">Вперемешку</button></div></div>
+        <div class="opt" id="optSec"><span>Время на карточку</span>
+          <div class="seg" data-key="sec"><button data-v="5">5 с</button><button data-v="8">8 с</button><button data-v="12">12 с</button><button data-v="20">20 с</button></div></div>
+        <div class="opt" id="optCount"><span>Сколько карточек</span>
+          <div class="seg" data-key="count"><button data-v="10">10</button><button data-v="20">20</button><button data-v="0">Все</button></div></div>
+        <div class="opt"><span>Озвучивать английский</span>
+          <label class="switch"><input type="checkbox" id="tts"> при перевороте</label></div>
+      </div>
+    </div>
+
+    <button id="startBtn" class="btn start">Начать</button>
+    <div class="foot"><span>Прогресс хранится в этом браузере</span><span id="resetBox"><button class="link" id="resetBtn">Сбросить прогресс</button></span></div>
+  </section>
+
+  <!-- SESSION -->
+  <section id="session" class="wrap" style="padding:0" hidden>
+    <div class="s-top">
+      <button class="btn ghost" id="exitBtn" style="padding:8px 14px;font-size:14px">← Выйти</button>
+      <div class="s-meta"><span id="sMode"></span><span class="mono" id="sCount"></span><span class="mono" id="sClock" hidden></span></div>
+    </div>
+    <div class="progress"><i id="sProg"></i></div>
+    <div class="tbar" id="tbar" hidden><i id="tbarI"></i></div>
+
+    <div class="scene">
+      <div class="card" id="card" tabindex="0" aria-live="polite">
+        <div class="face front">
+          <div class="face-h"><span class="tag" id="fTag"></span><span class="mono" id="fNum"></span></div>
+          <div class="face-body">
+            <div class="phrase" id="fText"></div>
+            <span class="hint" id="fHint" hidden></span>
+          </div>
+        </div>
+        <div class="face back">
+          <div class="face-h"><span class="tag" id="bTag"></span><span class="timeout" id="bTimeout" hidden>Время вышло</span></div>
+          <div class="face-body">
+            <div class="phrase" id="bText"></div>
+            <div class="sub" id="bSub"></div>
+            <button class="speak" id="speakBtn" aria-label="Произнести" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctrl" id="ctrl"></div>
+    <div class="tip" id="tip"></div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="wrap" style="padding:0" hidden>
+    <div class="score">
+      <div class="crumb" id="rTitle"></div>
+      <div class="big" id="rBig"></div>
+      <div class="chips" id="rChips"></div>
+    </div>
+    <div class="step">
+      <div class="step-h"><h2 id="rListH">Над чем поработать</h2></div>
+      <div class="list" id="rList"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn ghost" id="homeBtn">На главную</button>
+      <button class="btn" id="retryBtn">Повторить ошибки</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- DATA ---------- */
+function parse(prefix, txt){
+  return txt.trim().split('\n').map((l,i)=>{
+    const [en,ru,hint]=l.split('|').map(s=>s&&s.trim());
+    return {id:prefix+'-'+String(i+1).padStart(2,'0'),en,ru,hint:hint||''};
+  });
+}
+const COURSE = [
+ {id:'d01',num:'#01',title:'20 главных действий с предметами',blocks:[
+  {id:'d01a',title:'Часть А · с «it»',cards:parse('d01a',`
+Pick it up.|Подними / возьми это.|pick
+Put it down on the table.|Положи / поставь это на стол.
+Move it aside.|Отодвинь это в сторону.|aside
+Move it over here.|Передвинь / переставь это сюда.
+Put it in.|Положи это внутрь.
+Take it out.|Достань / вынь это.
+Give it to me.|Дай это мне.
+Lift it up.|Подними это вверх.|lift
+Lower it slowly.|Медленно опусти это.
+Tilt it slightly.|Слегка наклони это.
+Keep it upright.|Держи это вертикально.
+Bring it closer.|Поднеси это ближе.
+Move it farther away.|Отодвинь / отнеси это дальше.|farther
+Turn it around.|Разверни / поверни это.
+Give it a good shake.|Хорошенько встряхни это.
+Be careful! Don't drop it.|Осторожно! Не урони это.
+Carry it carefully.|Неси это осторожно.
+Set it down gently.|Аккуратно положи / поставь это.|set
+Turn it upside down.|Переверни это вверх дном.
+Leave it there.|Оставь это там.`)},
+  {id:'d01b',title:'Часть Б · с предметами',cards:parse('d01b',`
+Pick up the phone.|Подними / возьми телефон.|pick
+Put the cup down on the table.|Поставь чашку на стол.
+Move the book aside.|Отодвинь книгу в сторону.|aside
+Move the box over here.|Передвинь / переставь коробку сюда.
+Put the key in your pocket.|Положи ключ в карман.
+Take the key out of your pocket.|Достань ключ из кармана.
+Give me the pen.|Дай мне ручку.
+Lift the box up.|Подними коробку вверх.|lift
+Lower the box slowly.|Медленно опусти коробку.
+Tilt the bottle slightly.|Слегка наклони бутылку.
+Keep the bottle upright.|Держи бутылку вертикально.
+Bring the phone closer.|Поднеси телефон ближе.
+Move the phone farther away.|Отодвинь / отнеси телефон подальше.|farther
+Turn the phone around.|Разверни телефон.
+Give the bottle a good shake.|Хорошенько встряхни бутылку.
+Be careful! Don't drop the glass.|Осторожно! Не урони стакан.
+Carry the laptop carefully.|Неси ноутбук осторожно.
+Set the plate down gently.|Аккуратно поставь тарелку.|set
+Turn the cup upside down.|Переверни чашку вверх дном.
+Leave the keys there.|Оставь ключи там.`)}
+ ]},
+ {id:'d02',num:'#02',title:'Приключения чашки',blocks:[
+  {id:'d02a',title:'Часть А · чашка в руках',cards:parse('d02a',`
+Pick up the cup.|Возьми чашку.|pick
+Put the cup down on the table.|Поставь чашку на стол.
+Turn the cup around.|Поверни чашку другой стороной.
+Move the cup aside.|Отодвинь чашку в сторону.|aside
+Move the cup over here.|Переставь чашку сюда.
+Put the cup in the cabinet.|Поставь чашку в шкаф.
+Take it out of the cabinet.|Достань её из шкафа.
+Give the cup to me.|Дай чашку мне.|to me
+Hold the cup by the handle.|Держи чашку за ручку.
+Lift the cup up.|Подними чашку.|lift
+Lower the cup slowly.|Медленно опусти чашку.
+Tilt the cup slightly.|Слегка наклони чашку.
+Don't spill the drink.|Не пролей напиток.
+Keep the cup steady.|Держи чашку неподвижно.|steady
+Bring the cup closer.|Поднеси чашку ближе.
+Move the cup farther away.|Отодвинь чашку подальше.|farther
+Look at the cup.|Посмотри на чашку.
+Check if it's clean.|Проверь, чистая ли она.
+Shake the cup gently.|Осторожно встряхни чашку.|shake
+Be careful! Don't drop the cup.|Осторожно! Не урони чашку.
+Carry the cup carefully.|Неси чашку осторожно.
+Set the cup down gently.|Аккуратно поставь чашку.|set`)},
+  {id:'d02b',title:'Часть Б · напиток',cards:parse('d02b',`
+Pour some water into the cup.|Налей немного воды в чашку.
+Add some sugar.|Добавь немного сахара.
+Stir the drink.|Размешай напиток.
+Bring the cup to your lips.|Поднеси чашку к губам.
+Take a sip.|Сделай глоток.
+Be careful, it's hot.|Осторожно, напиток горячий.
+Drink from the cup.|Пей из чашки.
+Finish your drink.|Допей свой напиток.
+Wash the cup.|Помой чашку.
+Turn the cup upside down.|Переверни чашку вверх дном.
+Leave the cup there.|Оставь чашку там.`)}
+ ]}
+];
+const ALL = {}; COURSE.forEach(l=>l.blocks.forEach(b=>b.cards.forEach(c=>{c.lesson=l;c.block=b;ALL[c.id]=c})));
+
+/* ---------- STORAGE ---------- */
+const KEY='drill-cards-v1';
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+const st=Object.assign({results:{},sel:['d01a'],mist:false,mode:'self',dir:'ru',order:'seq',sec:'8',count:'20',tts:true},load());
+
+function grade(id,g){ // g: 3 knew, 2 unsure, 1 fail
+  const r=st.results[id]||{box:0,last:null};
+  if(g===3) r.box=Math.min(5,r.box+1);
+  else if(g===2) r.box=Math.max(1,r.box);
+  else r.box=1;
+  r.last = g===1?'fail':'ok'; r.t=Date.now();
+  st.results[id]=r;
+}
+const learned=id=>(st.results[id]?.box||0)>=3;
+const mistakes=()=>Object.keys(st.results).filter(id=>st.results[id].last==='fail'&&ALL[id]);
+
+/* ---------- HOME ---------- */
+const $=id=>document.getElementById(id);
+function renderTree(){
+  $('tree').innerHTML = COURSE.map(l=>`
+    <div class="lesson"><div class="lesson-h"><span class="num">${l.num}</span><h3>${l.title}</h3></div>
+    ${l.blocks.map(b=>{const n=b.cards.length,k=b.cards.filter(c=>learned(c.id)).length;return`
+      <label class="block"><input type="checkbox" data-b="${b.id}" ${st.sel.includes(b.id)?'checked':''}>
+        <div class="t"><div>${b.title}</div><div class="bar"><i style="width:${n?k/n*100:0}%"></i></div></div>
+        <span class="cnt">${k}/${n}</span></label>`}).join('')}
+    </div>`).join('');
+  $('tree').querySelectorAll('input').forEach(i=>i.onchange=()=>{
+    st.sel=[...$('tree').querySelectorAll('input:checked')].map(x=>x.dataset.b);save();updStart();});
+  const m=mistakes().length;
+  $('mistCnt').textContent=m?m+' фраз':'пока нет';
+  $('mist').disabled=!m; $('mistRow').classList.toggle('off',!m);
+  $('mist').checked=st.mist&&m>0;
+}
+$('mist').onchange=e=>{st.mist=e.target.checked;save();updStart()};
+document.querySelectorAll('input[name=mode]').forEach(r=>{r.checked=r.value===st.mode;r.onchange=()=>{st.mode=r.value;save();updOpts();updStart()}});
+document.querySelectorAll('.seg').forEach(seg=>{
+  const k=seg.dataset.key;
+  seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{st[k]=b.dataset.v;save();paintSegs();updStart()});
+});
+function paintSegs(){document.querySelectorAll('.seg').forEach(seg=>seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(st[seg.dataset.key]===b.dataset.v))))}
+$('tts').checked=st.tts; $('tts').onchange=e=>{st.tts=e.target.checked;save()};
+function updOpts(){const ex=st.mode==='exam';$('optOrder').hidden=ex;$('optSec').hidden=!ex;$('optCount').hidden=!ex}
+function baseDeck(){
+  const ids=new Set();
+  COURSE.forEach(l=>l.blocks.forEach(b=>{if(st.sel.includes(b.id))b.cards.forEach(c=>ids.add(c.id))}));
+  if(st.mist) mistakes().forEach(id=>ids.add(id));
+  return [...ids].map(id=>ALL[id]);
+}
+function updStart(){
+  let n=baseDeck().length;
+  if(st.mode==='exam'&&+st.count) n=Math.min(n,+st.count);
+  $('startBtn').disabled=!n;
+  $('startBtn').textContent=n?`Начать · ${n} ${plural(n,'карточка','карточки','карточек')}`:'Выберите хотя бы один блок';
+}
+function plural(n,a,b,c){const m=n%10,h=n%100;return m===1&&h!==11?a:m>=2&&m<=4&&(h<10||h>=20)?b:c}
+function restoreReset(){$('resetBox').innerHTML='<button class="link" id="resetBtn">Сбросить прогресс</button>';bindReset()}
+function bindReset(){$('resetBtn').onclick=()=>{
+  $('resetBox').innerHTML='Точно сбросить? <button class="link danger" id="rsYes">Да</button> · <button class="link" id="rsNo">Нет</button>';
+  $('rsYes').onclick=()=>{st.results={};st.mist=false;save();restoreReset();renderTree();updStart()};
+  $('rsNo').onclick=restoreReset;}}
+bindReset();
+
+/* ---------- SESSION ---------- */
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let S=null;
+function startSession(cards){
+  let deck=cards||baseDeck();
+  const mode=st.mode;
+  if(mode==='exam'||st.order==='rnd') deck=shuffle(deck);
+  if(mode==='exam'&&+st.count) deck=deck.slice(0,+st.count);
+  deck=deck.map(c=>({c,dir:st.dir==='mix'?(Math.random()<.5?'ru':'en'):st.dir}));
+  S={mode,deck,i:0,total:deck.length,flipped:false,log:[],seen:new Set(),t0:Date.now(),tick:null,left:0,timedOut:false};
+  show('session');
+  $('sMode').textContent={study:'Изучение',self:'Самопроверка',exam:'Экзамен'}[mode];
+  $('tbar').hidden=mode!=='exam'; $('sClock').hidden=mode!=='exam';
+  clearInterval(S.clockT);
+  if(mode==='exam') S.clockT=setInterval(()=>{$('sClock').textContent=fmt(Date.now()-S.t0)},500);
+  renderCard();
+}
+function fmt(ms){const s=Math.floor(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function cur(){return S.deck[S.i]}
+function renderCard(){
+  const {c,dir}=cur(), card=$('card');
+  card.style.transition='none'; card.classList.remove('flipped'); void card.offsetWidth; card.style.transition='';
+  S.flipped=false; S.timedOut=false;
+  const front=dir==='ru'?c.ru:c.en, back=dir==='ru'?c.en:c.ru;
+  $('fTag').textContent=dir==='ru'?'Скажи по-английски':'Переведи на русский';
+  $('bTag').textContent=dir==='ru'?'English':'Русский';
+  $('fNum').textContent=`№ ${String(S.i+1).padStart(2,'0')} · ${c.lesson.num}`;
+  $('fText').textContent=front; $('bText').textContent=back; $('bSub').textContent=front;
+  $('fHint').hidden=true; $('fHint').textContent='подсказка: '+c.hint;
+  $('speakBtn').hidden=false;
+  $('bTimeout').hidden=true;
+  $('sCount').textContent=`${Math.min(S.i+1,S.deck.length)} / ${S.deck.length}`;
+  $('sProg').style.width=(S.i/S.deck.length*100)+'%';
+  renderCtrl();
+  if(S.mode==='exam') startTimer();
+}
+function flip(){
+  if(S.flipped) { if(S.mode==='study') {$('card').classList.remove('flipped');S.flipped=false;renderCtrl();} return; }
+  S.flipped=true; $('card').classList.add('flipped'); stopTimer();
+  if(st.tts) speak(cur().c.en);
+  renderCtrl();
+}
+function renderCtrl(){
+  const m=S.mode, f=S.flipped, c=cur().c, ctrl=$('ctrl');
+  let h='', tip='';
+  if(m==='study'){
+    h=`<button class="btn ghost" data-a="prev" ${S.i===0?'disabled':''}>← Назад</button>
+       <button class="btn" data-a="flip">${f?'Скрыть':'Перевернуть'}</button>
+       <button class="btn ghost" data-a="next">${S.i===S.deck.length-1?'Готово':'Далее →'}</button>`;
+    tip='Пробел — перевернуть · ← → — листать';
+  } else if(!f){
+    h=(m==='self'&&c.hint?`<button class="btn ghost" data-a="hint" style="flex:0 0 auto">Подсказка</button>`:'')+
+      `<button class="btn" data-a="flip">Проверить<kbd>Space</kbd></button>`;
+    tip='Вспомни фразу и произнеси её вслух, потом нажми «Проверить»';
+  } else if(m==='self'){
+    h=`<button class="btn bad" data-g="1">Не знал<kbd>1</kbd></button>
+       <button class="btn warn" data-g="2">Сомневался<kbd>2</kbd></button>
+       <button class="btn good" data-g="3">Знал<kbd>3</kbd></button>`;
+    tip='«Не знал» — карточка вернётся в конце сессии';
+  } else {
+    h=S.timedOut?`<button class="btn" data-g="1">Далее<kbd>Space</kbd></button>`:
+      `<button class="btn bad" data-g="1">Ошибся<kbd>1</kbd></button><button class="btn good" data-g="3">Верно<kbd>3</kbd></button>`;
+    tip=S.timedOut?'Засчитано как ошибка':'Сравни со своим ответом честно';
+  }
+  ctrl.innerHTML=h; $('tip').textContent=tip;
+  ctrl.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>act(b.dataset.a));
+  ctrl.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>rate(+b.dataset.g));
+}
+function act(a){
+  if(a==='flip') flip();
+  else if(a==='hint') $('fHint').hidden=false;
+  else if(a==='prev'&&S.i>0){S.i--;renderCard()}
+  else if(a==='next'){ if(S.i<S.deck.length-1){S.i++;renderCard()} else finish(); }
+}
+function rate(g){
+  const item=cur(), first=!S.seen.has(item.c.id);
+  S.seen.add(item.c.id);
+  if(first){S.log.push({c:item.c,g}); grade(item.c.id,g);}
+  else if(g===1) grade(item.c.id,1);
+  if(S.mode==='self'&&g===1) S.deck.push({c:item.c,dir:item.dir});
+  save();
+  if(S.i<S.deck.length-1){S.i++;renderCard()} else finish();
+}
+/* exam timer */
+function startTimer(){
+  stopTimer(); const dur=+st.sec*1000, t0=Date.now();
+  $('tbar').classList.remove('low'); $('tbarI').style.width='100%';
+  S.tick=setInterval(()=>{
+    const left=dur-(Date.now()-t0), p=Math.max(0,left/dur);
+    $('tbarI').style.width=(p*100)+'%'; $('tbar').classList.toggle('low',p<.3);
+    if(left<=0){stopTimer();S.timedOut=true;$('bTimeout').hidden=false;flip();}
+  },50);
+}
+function stopTimer(){clearInterval(S&&S.tick)}
+function finish(){
+  stopTimer(); clearInterval(S.clockT);
+  const log=S.log, n=log.length, ok=log.filter(x=>x.g===3).length, mid=log.filter(x=>x.g===2).length, bad=log.filter(x=>x.g===1);
+  show('results');
+  const title={study:'Изучение завершено',self:'Самопроверка завершена',exam:'Результат экзамена'}[S.mode];
+  $('rTitle').textContent=title;
+  if(S.mode==='study'){
+    $('rBig').innerHTML=`${S.deck.length}<small> карточек</small>`;
+    $('rChips').innerHTML=`<span class="chip" style="background:var(--accent-soft);color:var(--accent)">Пора проверить себя</span>`;
+    $('rListH').parentElement.parentElement.hidden=true; $('retryBtn').textContent='Самопроверка';
+    $('retryBtn').onclick=()=>{st.mode='self';save();syncMode();startSession(S.deck.map(x=>x.c))};
+    return;
+  }
+  $('rListH').parentElement.parentElement.hidden=false;
+  const pct=n?Math.round(ok/n*100):0;
+  $('rBig').innerHTML=`${ok}<small> / ${n}</small>`;
+  let chips=`<span class="chip" style="background:var(--good-soft);color:var(--good)">${pct}% с первого раза</span>`;
+  if(S.mode==='self') chips+=`<span class="chip" style="background:var(--warn-soft);color:var(--warn)">сомневался: ${mid}</span>`;
+  chips+=`<span class="chip" style="background:var(--bad-soft);color:var(--bad)">ошибок: ${bad.length}</span>`;
+  if(S.mode==='exam') chips+=`<span class="chip mono" style="background:var(--accent-soft);color:var(--accent)">⏱ ${fmt(Date.now()-S.t0)}</span>`;
+  $('rChips').innerHTML=chips;
+  const weak=log.filter(x=>x.g<3);
+  $('rList').innerHTML=weak.length?weak.map(x=>`<div><span class="en">${x.c.en}</span><span class="ru">${x.c.ru}${x.g===2?' · сомневался':''}</span></div>`).join('')
+    :'<div class="empty">Ни одной ошибки. Отлично!</div>';
+  $('retryBtn').textContent='Повторить ошибки'; $('retryBtn').disabled=!weak.length;
+  $('retryBtn').onclick=()=>startSession(weak.map(x=>x.c));
+}
+function syncMode(){document.querySelectorAll('input[name=mode]').forEach(r=>r.checked=r.value===st.mode);updOpts()}
+function show(id){['home','session','results'].forEach(s=>$(s).hidden=s!==id);window.scrollTo(0,0);if(id==='home'){renderTree();updStart()}}
+
+/* speech */
+function speak(t){try{const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.9;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+$('speakBtn').onclick=e=>{e.stopPropagation();speak(cur().c.en)};
+
+$('card').onclick=()=>{ if(!S.flipped||S.mode==='study') flip(); };
+$('startBtn').onclick=()=>startSession();
+$('exitBtn').onclick=()=>{stopTimer();clearInterval(S.clockT);show('home')};
+$('homeBtn').onclick=()=>show('home');
+
+document.addEventListener('keydown',e=>{
+  if($('session').hidden||!S) return;
+  if(e.target.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter')) return;
+  const k=e.key;
+  if(k===' '||k==='Enter'){e.preventDefault();
+    if(S.mode==='study'||!S.flipped) flip(); else if(S.mode==='exam'&&S.timedOut) rate(1);}
+  else if(S.flipped&&S.mode!=='study'&&['1','2','3'].includes(k)){ if(S.mode==='exam'&&(k==='2'||S.timedOut))return; rate(+k) }
+  else if(S.mode==='study'&&k==='ArrowRight') act('next');
+  else if(S.mode==='study'&&k==='ArrowLeft') act('prev');
+  else if(k==='h'||k==='р') act('hint');
+  else if(k==='Escape') $('exitBtn').click();
+});
+
+paintSegs(); updOpts(); show('home');
+</script>
+
+</body></html>
